@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, createRef } from 'react'
 
 export interface SimpleInputProps {
   value: string
@@ -7,6 +7,7 @@ export interface SimpleInputProps {
 
 function SimpleInput(props: SimpleInputProps) {
   const [localValue, setLocalValue] = useState(props.value)
+  let input = createRef<HTMLInputElement>()
 
   const onChangeHandler = (event: any) => {
     setLocalValue(event.target.value)
@@ -17,16 +18,25 @@ function SimpleInput(props: SimpleInputProps) {
       update()
     }
     if (event.key === 'Escape') {
-      setLocalValue(props.value)
+      cancel()
     }
   }
 
-  const onFocusHandler = (event: React.FocusEvent<HTMLInputElement>) => {
-    event.target.select()
+  const onFocusHandler = () => {
+    if (input.current) {
+      input.current.select()
+    }
   }
 
   const update = () => {
     props.onChange(localValue)
+    input.current!.blur()
+  }
+
+  const cancel = () => {
+    input.current!.blur()
+    props.onChange(props.value)
+    setLocalValue(props.value)
   }
 
   return (
@@ -37,6 +47,7 @@ function SimpleInput(props: SimpleInputProps) {
       onBlur={update}
       onKeyDown={onKeyDownhandler}
       onFocus={onFocusHandler}
+      ref={input}
     />
   )
 }
